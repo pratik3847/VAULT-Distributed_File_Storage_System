@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files
+.env
+**/.env
+
+# Build outputs
+dist/
+build/
+coverage/
+**/dist/
+**/build/
+**/coverage/
+
+# Uploads and local storage
+uploads/
+**/uploads/
+
+# Prisma / generated artifacts
+.prisma/
+**/.prisma/
+
+# Editor / OS files
+.vscode/
+.DS_Store
+Thumbs.db
