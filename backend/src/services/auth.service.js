@@ -1,13 +1,14 @@
 const userRepository = require("../repositories/user.repository");
 const { hashPassword } = require("../utils/password");
 const { generateToken } = require("../utils/jwt");
+const AppError = require("../utils/appError");
 
 async function signup(userData) {
   // Check if email already exists
   const existingUser = await userRepository.findByEmail(userData.email);
 
   if (existingUser) {
-    throw new Error("User with this email already exists");
+    throw new AppError("User with this email already exists", 409);
   }
 
   // Hash password
