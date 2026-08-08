@@ -2,9 +2,6 @@ require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
 
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
-console.log("JWT_EXPIRES_IN:", process.env.JWT_EXPIRES_IN);
-
 try {
   const token = jwt.sign(
     { id: "123" },

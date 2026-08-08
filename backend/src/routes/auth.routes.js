@@ -12,10 +12,6 @@ const authenticate = require("../middleware/auth.middleware");
 const router = express.Router();
 
 
-
-console.log("Validate:", validate);
-console.log("Type:", typeof validate);
-
 router.post(
   "/signup",
   validate(signupSchema),

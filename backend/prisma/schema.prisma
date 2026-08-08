@@ -19,13 +19,16 @@ model User {
 
 model File {
   id           String   @id @default(uuid())
-  filename     String
+
+  originalName String
   storedName   String
   mimeType     String
   size         Int
   storagePath  String
-  createdAt    DateTime @default(now())
 
-  ownerId String
-  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownerId      String
+  owner         User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }

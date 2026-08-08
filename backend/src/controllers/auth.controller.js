@@ -4,7 +4,10 @@ const asyncHandler = require("../utils/asyncHandler");
 const signup = asyncHandler(async (req, res) => {
   const result = await authService.signup(req.body);
 
-  return res.status(201).json(result);
+  return res.status(201).json({
+  success: true,
+  data: result,
+  });
 });
 
 const login = asyncHandler(async (req, res) => {
