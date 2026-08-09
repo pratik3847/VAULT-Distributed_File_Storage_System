@@ -14,7 +14,8 @@ model User {
   password  String
   createdAt DateTime @default(now())
 
-  files File[]
+  files          File[]
+  uploadSessions UploadSession[]
 }
 
 model File {
@@ -30,5 +31,45 @@ model File {
   updatedAt    DateTime @updatedAt
 
   ownerId      String
-  owner         User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner        User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+model UploadSession {
+  id           String   @id @default(uuid())
+
+  originalName String
+  mimeType     String
+  totalSize    Int
+  chunkSize    Int
+  totalChunks  Int
+
+  status       UploadStatus @default(INITIATED)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownerId      String
+  owner        User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  chunks       FileChunk[]
+}
+
+model FileChunk {
+  id              String   @id @default(uuid())
+  chunkNumber     Int
+  size            Int
+  path            String
+  uploadedAt      DateTime @default(now())
+
+  uploadSessionId String
+  uploadSession   UploadSession @relation(fields: [uploadSessionId], references: [id], onDelete: Cascade)
+
+  @@unique([uploadSessionId, chunkNumber])
+}
+
+enum UploadStatus {
+  INITIATED
+  UPLOADING
+  COMPLETED
+  FAILED
 }

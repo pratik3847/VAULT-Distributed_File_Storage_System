@@ -2,7 +2,9 @@ const errorHandler = require("./middleware/error.middleware");
 const express = require("express");
 const authRoutes = require("./routes/auth.routes");
 const fileRoutes = require("./routes/file.routes");
+const uploadRoutes = require("./routes/upload.routes");
 const app = express();
+
 
 // Middleware
 app.use(express.json());
@@ -14,5 +16,7 @@ app.use("/auth", authRoutes);
 app.use(errorHandler);
 
 app.use("/files", fileRoutes);
+
+app.use("/uploads", uploadRoutes);
 
 module.exports = app;
