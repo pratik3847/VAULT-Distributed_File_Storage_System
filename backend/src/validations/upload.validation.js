@@ -15,6 +15,19 @@ const initUploadSchema = z.object({
     .positive("File size must be greater than 0"),
 });
 
+const chunkParamsSchema = z.object({
+  uploadId: z.uuid("Invalid upload ID"),
+});
+
+const chunkBodySchema = z.object({
+  chunkNumber: z.coerce
+    .number()
+    .int("Chunk number must be an integer")
+    .nonnegative("Chunk number cannot be negative"),
+});
+
 module.exports = {
   initUploadSchema,
+  chunkParamsSchema,
+  chunkBodySchema,
 };
