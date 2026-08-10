@@ -15,6 +15,7 @@ model User {
   createdAt DateTime @default(now())
 
   files          File[]
+  folders        Folder[]
   uploadSessions UploadSession[]
 }
 
@@ -32,6 +33,33 @@ model File {
 
   ownerId      String
   owner        User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  folderId     String?
+  folder       Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@index([ownerId])
+  @@index([folderId])
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerId   String
+  owner     User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  parentId  String?
+  parent    Folder? @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[] @relation("FolderHierarchy")
+
+  files     File[]
+  uploadSessions UploadSession[]
+
+  @@index([ownerId])
+  @@index([parentId])
 }
 
 model UploadSession {
@@ -51,7 +79,13 @@ model UploadSession {
   ownerId      String
   owner        User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
+  folderId     String?
+  folder       Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
   chunks       FileChunk[]
+
+  @@index([ownerId])
+  @@index([folderId])
 }
 
 model FileChunk {

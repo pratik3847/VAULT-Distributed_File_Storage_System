@@ -1,6 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 
+const folderRepository = require("../repositories/folder.repository");
 const uploadRepository = require("../repositories/upload.repository");
 const AppError = require("../utils/appError");
 const { Prisma } = require("@prisma/client");
@@ -12,8 +13,20 @@ const initUpload = async ({
   originalName,
   mimeType,
   totalSize,
+  folderId,
   ownerId,
 }) => {
+  if (folderId) {
+    const folder = await folderRepository.findByIdAndOwner(
+      folderId,
+      ownerId
+    );
+
+    if (!folder) {
+      throw new AppError("Folder not found", 404);
+    }
+  }
+
   const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
 
   const uploadSession = await uploadRepository.createUploadSession({
@@ -23,6 +36,7 @@ const initUpload = async ({
     chunkSize: CHUNK_SIZE,
     totalChunks,
     ownerId,
+    folderId: folderId || null,
   });
 
   return {
@@ -270,6 +284,7 @@ const completeUpload = async (uploadId, ownerId) => {
     size: finalStats.size,
     storageKey,
     ownerId,
+    folderId: uploadSession.folderId,
   });
 
   await fs.unlink(finalPath).catch(() => {});

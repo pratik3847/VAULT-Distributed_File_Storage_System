@@ -13,6 +13,12 @@ const initUploadSchema = z.object({
     .number()
     .int("File size must be an integer")
     .positive("File size must be greater than 0"),
+
+  folderId: z
+    .string()
+    .uuid("Invalid folder ID")
+    .optional()
+    .nullable(),
 });
 
 const chunkParamsSchema = z.object({
