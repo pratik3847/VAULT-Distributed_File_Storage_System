@@ -1,15 +1,8 @@
 const fileService = require("../services/file.service");
 const asyncHandler = require("../utils/asyncHandler");
+const { getFromS3 } = require("../services/storage.service");
 
-const uploadFile = asyncHandler(async (req, res) => {
-  const file = await fileService.uploadFile(req.file, req.user.id);
 
-  res.status(201).json({
-    success: true,
-    message: "File uploaded successfully",
-    data: file,
-  });
-});
 
 const getFiles = asyncHandler(async (req, res) => {
   const files = await fileService.getFiles(req.user.id);
@@ -38,7 +31,15 @@ const downloadFile = asyncHandler(async (req, res) => {
     req.user.id
   );
 
-  return res.download(file.storagePath, file.originalName);
+  const fileStream = await getFromS3(file.storageKey);
+
+  res.setHeader("Content-Type", file.mimeType);
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${file.originalName}"`
+  );
+
+  return fileStream.pipe(res);
 });
 
 const deleteFile = asyncHandler(async (req, res) => {
@@ -51,7 +52,7 @@ const deleteFile = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  uploadFile,
+  
   getFiles,
   getFile,
   downloadFile,

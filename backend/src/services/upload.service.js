@@ -4,6 +4,7 @@ const path = require("path");
 const uploadRepository = require("../repositories/upload.repository");
 const AppError = require("../utils/appError");
 const { Prisma } = require("@prisma/client");
+const { uploadToS3 } = require("./storage.service");
 
 const CHUNK_SIZE = 5 * 1024 * 1024;
 
@@ -253,15 +254,25 @@ const completeUpload = async (uploadId, ownerId) => {
     );
   }
 
+  const storageKey = `users/${ownerId}/files/${uploadSession.id}/${uploadSession.originalName}`;
+
+    await uploadToS3({
+      key: storageKey,
+      body: await fs.readFile(finalPath),
+      contentType: uploadSession.mimeType,
+    });
+
   // Create final File record
   const file = await uploadRepository.createFile({
     originalName: uploadSession.originalName,
     storedName,
     mimeType: uploadSession.mimeType,
     size: finalStats.size,
-    storagePath: finalPath,
+    storageKey,
     ownerId,
   });
+
+  await fs.unlink(finalPath).catch(() => {});
 
   // Mark upload session as completed
   await uploadRepository.completeUploadSession(

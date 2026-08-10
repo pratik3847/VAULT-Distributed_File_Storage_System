@@ -25,7 +25,7 @@ model File {
   storedName   String
   mimeType     String
   size         Int
-  storagePath  String
+  storageKey   String
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
