@@ -9,7 +9,7 @@ function validateParams(schema) {
       });
     }
 
-    req.params = result.data;
+    req.params = { ...req.params, ...result.data };
     next();
   };
 }

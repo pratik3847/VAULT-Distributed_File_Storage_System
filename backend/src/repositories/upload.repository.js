@@ -6,6 +6,19 @@ const createUploadSession = async (data) => {
   });
 };
 
+const findActiveSessionByIdempotencyKey = async (ownerId, idempotencyKey) => {
+  if (!idempotencyKey) return null;
+  return prisma.uploadSession.findFirst({
+    where: {
+      ownerId,
+      idempotencyKey,
+      status: {
+        in: ["INITIATED", "UPLOADING"],
+      },
+    },
+  });
+};
+
 const findUploadSessionByIdAndOwner = async (id, ownerId) => {
   return prisma.uploadSession.findFirst({
     where: {
@@ -76,8 +89,28 @@ const completeUploadSession = async (id) => {
   });
 };
 
+const findAbandonedSessions = async (olderThanDate) => {
+  return prisma.uploadSession.findMany({
+    where: {
+      status: {
+        in: ["INITIATED", "UPLOADING"],
+      },
+      createdAt: {
+        lt: olderThanDate,
+      },
+    },
+  });
+};
+
+const deleteUploadSession = async (id) => {
+  return prisma.uploadSession.delete({
+    where: { id },
+  });
+};
+
 module.exports = {
   createUploadSession,
+  findActiveSessionByIdempotencyKey,
   findUploadSessionByIdAndOwner,
   createFileChunk,
   findChunk,
@@ -85,4 +118,6 @@ module.exports = {
   updateUploadSessionStatus,
   createFile,
   completeUploadSession,
+  findAbandonedSessions,
+  deleteUploadSession,
 };

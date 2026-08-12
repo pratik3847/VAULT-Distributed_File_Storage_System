@@ -3,37 +3,27 @@ const { z } = require("zod");
 const initUploadSchema = z.object({
   originalName: z
     .string()
-    .min(1, "Original filename is required"),
-
-  mimeType: z
-    .string()
-    .min(1, "MIME type is required"),
-
-  totalSize: z
-    .number()
-    .int("File size must be an integer")
-    .positive("File size must be greater than 0"),
-
-  folderId: z
-    .string()
-    .uuid("Invalid folder ID")
-    .optional()
-    .nullable(),
+    .trim()
+    .min(1, "Original name is required")
+    .max(255, "File name too long"),
+  mimeType: z.string().trim().min(1, "MIME type is required"),
+  totalSize: z.number().int().positive("Total size must be a positive integer"),
+  folderId: z.string().uuid("Invalid folder ID").optional().nullable(),
+  checksum: z.string().optional().nullable(),
 });
 
-const chunkParamsSchema = z.object({
-  uploadId: z.uuid("Invalid upload ID"),
+const uploadChunkSchema = z.object({
+  uploadId: z.string().uuid("Invalid upload ID"),
+  chunkNumber: z.coerce.number().int().min(0, "Chunk number must be 0 or positive"),
 });
 
-const chunkBodySchema = z.object({
-  chunkNumber: z.coerce
-    .number()
-    .int("Chunk number must be an integer")
-    .nonnegative("Chunk number cannot be negative"),
+const completeUploadSchema = z.object({
+  uploadId: z.string().uuid("Invalid upload ID"),
+  checksum: z.string().optional().nullable(),
 });
 
 module.exports = {
   initUploadSchema,
-  chunkParamsSchema,
-  chunkBodySchema,
+  uploadChunkSchema,
+  completeUploadSchema,
 };

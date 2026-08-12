@@ -52,6 +52,59 @@ const updateFolder = asyncHandler(async (req, res) => {
   });
 });
 
+const moveFolder = asyncHandler(async (req, res) => {
+  const folder = await folderService.moveFolder({
+    id: req.params.id,
+    targetParentId: req.body.parentId ?? null,
+    ownerId: req.user.id,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Folder moved successfully",
+    data: folder,
+  });
+});
+
+const toggleStarFolder = asyncHandler(async (req, res) => {
+  const folder = await folderService.toggleStarFolder(
+    req.params.id,
+    req.user.id
+  );
+
+  res.status(200).json({
+    success: true,
+    message: folder.isStarred ? "Folder starred" : "Folder unstarred",
+    data: folder,
+  });
+});
+
+const trashFolder = asyncHandler(async (req, res) => {
+  const folder = await folderService.trashFolder(
+    req.params.id,
+    req.user.id
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Folder moved to trash",
+    data: folder,
+  });
+});
+
+const restoreFolder = asyncHandler(async (req, res) => {
+  const folder = await folderService.restoreFolder(
+    req.params.id,
+    req.user.id
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Folder restored",
+    data: folder,
+  });
+});
+
 const deleteFolder = asyncHandler(async (req, res) => {
   await folderService.deleteFolder(
     req.params.id,
@@ -69,5 +122,9 @@ module.exports = {
   getRootFolders,
   getFolder,
   updateFolder,
+  moveFolder,
+  toggleStarFolder,
+  trashFolder,
+  restoreFolder,
   deleteFolder,
 };

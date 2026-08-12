@@ -1,6 +1,7 @@
 const express = require("express");
 const authController = require("../controllers/auth.controller");
 const validate = require("../middleware/validate.middleware");
+const { authLimiter } = require("../middleware/rateLimit.middleware");
 const {
   signupSchema,
   loginSchema,
@@ -11,15 +12,16 @@ const authenticate = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
-
 router.post(
   "/signup",
+  authLimiter,
   validate(signupSchema),
   authController.signup
 );
 
 router.post(
   "/login",
+  authLimiter,
   validate(loginSchema),
   authController.login
 );
@@ -38,6 +40,3 @@ router.patch(
 );
 
 module.exports = router;
-
-
-

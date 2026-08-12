@@ -2,22 +2,39 @@ const uploadService = require("../services/upload.service");
 const asyncHandler = require("../utils/asyncHandler");
 
 const initUpload = asyncHandler(async (req, res) => {
+  const body = req.body || {};
+  const idempotencyKey =
+    req.headers["idempotency-key"] ||
+    req.headers["x-idempotency-key"] ||
+    body.idempotencyKey;
+
+  const checksum =
+    req.headers["x-checksum-sha256"] ||
+    body.checksum;
+
   const upload = await uploadService.initUpload({
-    ...req.body,
+    ...body,
     ownerId: req.user.id,
+    idempotencyKey,
+    checksum,
   });
 
-  res.status(201).json({
+  const statusCode = upload.isExistingSession ? 200 : 201;
+
+  res.status(statusCode).json({
     success: true,
-    message: "Upload session initialized successfully",
+    message: upload.isExistingSession
+      ? "Existing active upload session returned"
+      : "Upload session initialized successfully",
     data: upload,
   });
 });
 
 const uploadChunk = asyncHandler(async (req, res) => {
+  const body = req.body || {};
   const chunk = await uploadService.uploadChunk({
     uploadId: req.params.uploadId,
-    chunkNumber: req.body.chunkNumber,
+    chunkNumber: Number(body.chunkNumber),
     file: req.file,
     ownerId: req.user.id,
   });
@@ -45,9 +62,15 @@ const getUploadStatus = asyncHandler(async (req, res) => {
 });
 
 const completeUpload = asyncHandler(async (req, res) => {
+  const body = req.body || {};
+  const clientChecksum =
+    req.headers["x-checksum-sha256"] ||
+    body.checksum;
+
   const file = await uploadService.completeUpload(
     req.params.uploadId,
-    req.user.id
+    req.user.id,
+    clientChecksum
   );
 
   res.status(201).json({
@@ -58,6 +81,7 @@ const completeUpload = asyncHandler(async (req, res) => {
       originalName: file.originalName,
       size: file.size,
       mimeType: file.mimeType,
+      sha256: file.sha256,
     },
   });
 });

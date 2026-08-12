@@ -31,9 +31,28 @@ async function updateUser(id, data) {
   });
 }
 
+async function searchUsers(query, currentUserId) {
+  return await prisma.user.findMany({
+    where: {
+      id: { not: currentUserId },
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } },
+      ],
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+    take: 10,
+  });
+}
+
 module.exports = {
   findByEmail,
   createUser,
-    findById,
+  findById,
   updateUser,
+  searchUsers,
 };
