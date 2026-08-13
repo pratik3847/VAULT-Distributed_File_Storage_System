@@ -280,8 +280,8 @@ const completeUpload = async (uploadId, ownerId, clientChecksum = null) => {
 
   await fs.unlink(finalPath).catch(() => {});
 
-  // Delete upload session from DB (cascade-deletes all associated FileChunk DB records)
-  await uploadRepository.deleteUploadSession(uploadSession.id);
+  // Link upload session to File in DB (when File is deleted, onDelete: Cascade deletes UploadSession & FileChunks)
+  await uploadRepository.completeUploadSession(uploadSession.id, file.id);
 
   // Delete temporary chunks directory on disk
   const chunkDirectory = path.join(

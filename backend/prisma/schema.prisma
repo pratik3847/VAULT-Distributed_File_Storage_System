@@ -43,6 +43,7 @@ model File {
   folder       Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
 
   permissions  FilePermission[]
+  uploadSession UploadSession?
 
   @@index([ownerId])
   @@index([folderId])
@@ -115,10 +116,13 @@ model UploadSession {
   ownerId        String
   owner          User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  folderId       String?
-  folder         Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  folderId     String?
+  folder       Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
 
-  chunks         FileChunk[]
+  fileId       String?  @unique
+  file         File?    @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  chunks       FileChunk[]
 
   @@index([ownerId])
   @@index([folderId])

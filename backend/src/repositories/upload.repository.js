@@ -78,13 +78,14 @@ const createFile = async (data) => {
   });
 };
 
-const completeUploadSession = async (id) => {
+const completeUploadSession = async (id, fileId = null) => {
   return prisma.uploadSession.update({
     where: {
       id,
     },
     data: {
       status: "COMPLETED",
+      ...(fileId && { fileId }),
     },
   });
 };
