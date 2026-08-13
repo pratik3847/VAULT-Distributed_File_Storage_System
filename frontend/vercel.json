@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth/:path*",
+      "destination": "http://vault-alb-154114692.ap-south-1.elb.amazonaws.com/auth/:path*"
+    },
+    {
+      "source": "/files/:path*",
+      "destination": "http://vault-alb-154114692.ap-south-1.elb.amazonaws.com/files/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "http://vault-alb-154114692.ap-south-1.elb.amazonaws.com/uploads/:path*"
+    },
+    {
+      "source": "/api/folders/:path*",
+      "destination": "http://vault-alb-154114692.ap-south-1.elb.amazonaws.com/api/folders/:path*"
+    },
+    {
+      "source": "/users/:path*",
+      "destination": "http://vault-alb-154114692.ap-south-1.elb.amazonaws.com/users/:path*"
+    }
+  ]
+}
