@@ -20,7 +20,7 @@
 <p align="center">
   <a href="https://vault-frontend-beryl.vercel.app/">🚀 Live Demo</a>
   &nbsp; • &nbsp;
-  <a href="https://github.com/pratik3847/distributed-file-storage-system">💻 Source Code</a>
+  <a href="http://github.com/pratik3847/VAULT-Distributed_File_Storage_System">💻 Source Code</a>
 </p>
 
 ---
