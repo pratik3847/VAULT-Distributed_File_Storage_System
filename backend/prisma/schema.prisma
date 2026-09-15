@@ -8,41 +8,34 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-
+  id                  String           @id @default(uuid())
+  name                String
+  email               String           @unique
+  password            String
+  createdAt           DateTime         @default(now())
   files               File[]
+  grantedPermissions  FilePermission[] @relation("GrantedPermissions")
+  receivedPermissions FilePermission[] @relation("ReceivedPermissions")
   folders             Folder[]
   uploadSessions      UploadSession[]
-  receivedPermissions FilePermission[] @relation("ReceivedPermissions")
-  grantedPermissions  FilePermission[] @relation("GrantedPermissions")
 }
 
 model File {
-  id           String   @id @default(uuid())
-
-  originalName String
-  storedName   String
-  mimeType     String
-  size         Int
-  storageKey   String
-
-  isStarred    Boolean  @default(false)
-  isTrashed    Boolean  @default(false)
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  ownerId      String
-  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-
-  folderId     String?
-  folder       Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
-
-  permissions  FilePermission[]
+  id            String           @id @default(uuid())
+  originalName  String
+  storedName    String
+  mimeType      String
+  size          Int
+  storageKey    String
+  isStarred     Boolean          @default(false)
+  isTrashed     Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  ownerId       String
+  folderId      String?
+  folder        Folder?          @relation(fields: [folderId], references: [id])
+  owner         User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  permissions   FilePermission[]
   uploadSession UploadSession?
 
   @@index([ownerId])
@@ -50,45 +43,35 @@ model File {
 }
 
 model Folder {
-  id        String   @id @default(uuid())
-  name      String
-
-  isStarred Boolean  @default(false)
-  isTrashed Boolean  @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  ownerId   String
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-
-  parentId  String?
-  parent    Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Folder[] @relation("FolderHierarchy")
-
+  id             String          @id @default(uuid())
+  name           String
+  isStarred      Boolean         @default(false)
+  isTrashed      Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  ownerId        String
+  parentId       String?
   files          File[]
+  owner          User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  parent         Folder?         @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children       Folder[]        @relation("FolderHierarchy")
   uploadSessions UploadSession[]
 
   @@index([ownerId])
   @@index([parentId])
 }
 
-enum Permission {
-  VIEWER
-  EDITOR
-}
-
 model FilePermission {
   id         String     @id @default(uuid())
   fileId     String
-  file       File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
   userId     String
-  user       User       @relation("ReceivedPermissions", fields: [userId], references: [id], onDelete: Cascade)
   sharedById String
-  sharedBy   User       @relation("GrantedPermissions", fields: [sharedById], references: [id], onDelete: Cascade)
   permission Permission @default(VIEWER)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
+  file       File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  sharedBy   User       @relation("GrantedPermissions", fields: [sharedById], references: [id], onDelete: Cascade)
+  user       User       @relation("ReceivedPermissions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([fileId, userId])
   @@index([fileId])
@@ -97,48 +80,44 @@ model FilePermission {
 }
 
 model UploadSession {
-  id             String   @id @default(uuid())
-
+  id             String       @id @default(uuid())
   originalName   String
   mimeType       String
   totalSize      Int
   chunkSize      Int
   totalChunks    Int
-
-  idempotencyKey String?
-  checksum       String?
-
   status         UploadStatus @default(INITIATED)
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   ownerId        String
-  owner          User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-
-  folderId     String?
-  folder       Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
-
-  fileId       String?  @unique
-  file         File?    @relation(fields: [fileId], references: [id], onDelete: Cascade)
-
-  chunks       FileChunk[]
+  folderId       String?
+  checksum       String?
+  idempotencyKey String?
+  fileId         String?      @unique
+  chunks         FileChunk[]
+  file           File?        @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  folder         Folder?      @relation(fields: [folderId], references: [id])
+  owner          User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
   @@index([folderId])
 }
 
 model FileChunk {
-  id              String   @id @default(uuid())
+  id              String        @id @default(uuid())
   chunkNumber     Int
   size            Int
   path            String
-  uploadedAt      DateTime @default(now())
-
+  uploadedAt      DateTime      @default(now())
   uploadSessionId String
   uploadSession   UploadSession @relation(fields: [uploadSessionId], references: [id], onDelete: Cascade)
 
   @@unique([uploadSessionId, chunkNumber])
+}
+
+enum Permission {
+  VIEWER
+  EDITOR
 }
 
 enum UploadStatus {
